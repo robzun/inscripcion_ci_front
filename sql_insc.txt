@@ -1,0 +1,147 @@
+-- REGIONES
+INSERT INTO region (nombre) VALUES
+  ('Coatzacoalcos'),
+  ('Minatitlán');
+
+-- CAMPUS
+INSERT INTO campus (id_region, nombre) VALUES
+  ((SELECT id_region FROM region WHERE nombre='Coatzacoalcos'), 'Campus Coatzacoalcos'),
+  ((SELECT id_region FROM region WHERE nombre='Minatitlán'),   'Campus Minatitlán');
+
+-- IDIOMAS
+INSERT INTO idioma (nombre, abreviatura) VALUES
+  ('Inglés',  'EN'),
+  ('Francés', 'FR');
+
+-- NIVELES (bloques únicos)
+INSERT INTO nivel (id_idioma, nombre, bloque) VALUES
+  ((SELECT id_idioma FROM idioma WHERE nombre='Inglés'),  'Básico',     'IBAS'),
+  ((SELECT id_idioma FROM idioma WHERE nombre='Inglés'),  'Intermedio', 'IINT'),
+  ((SELECT id_idioma FROM idioma WHERE nombre='Inglés'),  'Avanzado',   'IAVA'),
+  ((SELECT id_idioma FROM idioma WHERE nombre='Francés'), 'Básico',     'FBAS');
+
+-- GRUPOS BASE (ejemplos)
+INSERT INTO grupo_base (id_nivel, nombre_grupo) VALUES
+  ((SELECT id_nivel FROM nivel WHERE bloque='IBAS'), 'IBAS 101'),
+  ((SELECT id_nivel FROM nivel WHERE bloque='IINT'), 'IINT 401'),
+  ((SELECT id_nivel FROM nivel WHERE bloque='IAVA'), 'IAVA 701'),
+  ((SELECT id_nivel FROM nivel WHERE bloque='FBAS'), 'FBAS 101');
+
+-- PERIODO ESCOLAR
+INSERT INTO periodo_escolar (nombre, codigo_periodo, fecha_inicio, fecha_fin)
+VALUES ('Agosto-Diciembre 2025', '2025-AD', '2025-08-01', '2025-12-20');
+
+-- GRUPOS OFERTADOS (NRC 5 chars; UNIQUE por base+campus+periodo)
+INSERT INTO grupo_ofertado (id_grupo_base, id_campus, id_periodo, NRC) VALUES
+  ((SELECT id_grupo_base FROM grupo_base WHERE nombre_grupo='IBAS 101'),
+   (SELECT id_campus FROM campus WHERE nombre='Campus Coatzacoalcos'),
+   (SELECT id_periodo FROM periodo_escolar WHERE codigo_periodo='2025-AD'),
+   'A1001'),
+  ((SELECT id_grupo_base FROM grupo_base WHERE nombre_grupo='IINT 401'),
+   (SELECT id_campus FROM campus WHERE nombre='Campus Coatzacoalcos'),
+   (SELECT id_periodo FROM periodo_escolar WHERE codigo_periodo='2025-AD'),
+   'A1401'),
+  ((SELECT id_grupo_base FROM grupo_base WHERE nombre_grupo='IAVA 701'),
+   (SELECT id_campus FROM campus WHERE nombre='Campus Minatitlán'),
+   (SELECT id_periodo FROM periodo_escolar WHERE codigo_periodo='2025-AD'),
+   'M1701'),
+  ((SELECT id_grupo_base FROM grupo_base WHERE nombre_grupo='FBAS 101'),
+   (SELECT id_campus FROM campus WHERE nombre='Campus Minatitlán'),
+   (SELECT id_periodo FROM periodo_escolar WHERE codigo_periodo='2025-AD'),
+   'M2101');
+
+-- ROLES (ya los insertaste en tu script; si no, descomenta)
+-- INSERT INTO rol (nombre_rol) VALUES ('Administrador'), ('Validador'), ('Alumno');
+
+-- USUARIOS
+INSERT INTO usuario (id_rol, correo_electronico, nombre, apellido_materno, apellido_paterno, password_hash, sexo)
+VALUES
+  ((SELECT id_rol FROM rol WHERE nombre_rol='Administrador'),
+   'admin@ci.local','Ada','Lovelace','Byron','$2y$fakehashadmin','F'),
+  ((SELECT id_rol FROM rol WHERE nombre_rol='Validador'),
+   'validador@ci.local','Alan','Mathison','Turing','$2y$fakehashval','M'),
+  ((SELECT id_rol FROM rol WHERE nombre_rol='Alumno'),
+   'alumno1@ci.local','María','García','López','$2y$fakehashal1','F');
+
+-- ALUMNOS (relaciona al usuario Alumno)
+INSERT INTO alumno (id_usuario, matricula, telefono) VALUES
+  ((SELECT id_usuario FROM usuario WHERE correo_electronico='alumno1@ci.local'),
+   'A2025-0001','9211234567');
+
+-- TIPOS DE INSCRIPCIÓN
+INSERT INTO tipo_inscripcion (nombre, descripcion) VALUES
+  ('Nuevo ingreso','Alumno de primer ingreso o por clasificación'),
+  ('Reingreso','Alumno de semestres superiores');
+
+-- INSCRIPCIONES (respeta EXACTO los ENUM y CHECK)
+-- OJO: en tu DDL, metodo_pago tiene un espacio al final en "MI PAGO UV "
+INSERT INTO inscripcion (
+  id_alumno, id_grupo_ofertado, id_tipo_inscripcion,
+  observacion, estado, medio_difusion, metodo_pago,
+  linea_captura, numero_referencia, numero_autorizacion
+) VALUES
+  (
+    (SELECT id_alumno FROM alumno WHERE matricula='A2025-0001'),
+    (SELECT id_grupo_ofertado FROM grupo_ofertado g
+       JOIN grupo_base gb ON gb.id_grupo_base=g.id_grupo_base
+     WHERE gb.nombre_grupo='IBAS 101' AND g.NRC='A1001'),
+    (SELECT id_tipo_inscripcion FROM tipo_inscripcion WHERE nombre='Nuevo ingreso'),
+    'Primera inscripción', 'PENDIENTE', 'Facebook', 'Ventanilla (Directo en Banco)',
+    'LC-2025-00001','REF-2025-00001','AUT-2025-00001'
+  );
+
+-- TIPOS DE DOCUMENTO
+INSERT INTO tipo_documento (nombre, descripcion, path_imagen) VALUES
+  ('Identificación', 'Identificación con fotografía vigente', NULL),
+  ('Acta de nacimiento', 'Acta de nacimiento o CURP', NULL),
+  ('Comprobante de pago', 'Comprobante bancario / registro de pago', NULL);
+
+-- REQUISITOS POR TIPO DE INSCRIPCIÓN
+-- Nuevo ingreso: 3 documentos
+INSERT INTO tipo_inscripcion_documento (id_tipo_inscripcion, id_tipo_documento) VALUES
+  ((SELECT id_tipo_inscripcion FROM tipo_inscripcion WHERE nombre='Nuevo ingreso'),
+   (SELECT id_tipo_documento FROM tipo_documento WHERE nombre='Identificación')),
+  ((SELECT id_tipo_inscripcion FROM tipo_inscripcion WHERE nombre='Nuevo ingreso'),
+   (SELECT id_tipo_documento FROM tipo_documento WHERE nombre='Acta de nacimiento')),
+  ((SELECT id_tipo_inscripcion FROM tipo_inscripcion WHERE nombre='Nuevo ingreso'),
+   (SELECT id_tipo_documento FROM tipo_documento WHERE nombre='Comprobante de pago'));
+
+-- Reingreso: solo comprobante de pago (ejemplo)
+INSERT INTO tipo_inscripcion_documento (id_tipo_inscripcion, id_tipo_documento) VALUES
+  ((SELECT id_tipo_inscripcion FROM tipo_inscripcion WHERE nombre='Reingreso'),
+   (SELECT id_tipo_documento FROM tipo_documento WHERE nombre='Comprobante de pago'));
+
+-- DOCUMENTOS ENTREGADOS (aún pendientes)
+INSERT INTO documento (id_inscripcion, id_tipo_documento, path_archivo, estado) VALUES
+  (
+    (SELECT id_inscripcion FROM inscripcion i
+      JOIN alumno a ON a.id_alumno=i.id_alumno
+     WHERE a.matricula='A2025-0001'),
+    (SELECT id_tipo_documento FROM tipo_documento WHERE nombre='Comprobante de pago'),
+    '/uploads/A2025-0001/comprobante_pago.pdf',
+    'PENDIENTE'
+  );
+
+-- PREGUNTAS DE FORMULARIO (ejemplos)
+INSERT INTO pregunta_formulario (texto_pregunta, opciones, tipo_respuesta) VALUES
+  ('¿Por cuál medio te enteraste de las inscripciones?',
+   JSON_OBJECT('Facebook','Facebook','Instagram','Instagram','Mi maestro(a)','Mi maestro(a)','Otro','Otro'),
+   'OPCION'),
+  ('Escribe tu matrícula', JSON_OBJECT(), 'TEXTO');
+
+-- RESPUESTAS (ejemplo ligadas a la inscripción)
+INSERT INTO respuesta_formulario (id_inscripcion, id_pregunta, texto_respuesta) VALUES
+  (
+    (SELECT id_inscripcion FROM inscripcion i
+      JOIN alumno a ON a.id_alumno=i.id_alumno
+     WHERE a.matricula='A2025-0001'),
+    (SELECT id_pregunta FROM pregunta_formulario WHERE tipo_respuesta='OPCION' LIMIT 1),
+    'Facebook'
+  ),
+  (
+    (SELECT id_inscripcion FROM inscripcion i
+      JOIN alumno a ON a.id_alumno=i.id_alumno
+     WHERE a.matricula='A2025-0001'),
+    (SELECT id_pregunta FROM pregunta_formulario WHERE tipo_respuesta='TEXTO' LIMIT 1),
+    'A2025-0001'
+  );
