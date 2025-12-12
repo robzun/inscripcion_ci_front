@@ -11,12 +11,13 @@ function DocsUpload() {
   const [tiposInscripcion, setTiposInscripcion] = useState([]);
   const [documentos, setDocumentos] = useState([]);
   const [archivosSubidos, setArchivosSubidos] = useState({});
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchTiposInscripcion = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
         
@@ -26,6 +27,20 @@ function DocsUpload() {
           return;
         }
 
+        // Fetch de datos del usuario
+        const userResponse = await fetch('http://localhost:8000/user/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!userResponse.ok) {
+          throw new Error('Error al obtener datos del usuario');
+        }
+
+        const user = await userResponse.json();
+        console.log("DATOS DEL USUARIO:", user);
+        setUserData(user);
+
+        // Fetch de tipos de inscripción
         const response = await fetch('http://localhost:8000/enrollment_type', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -52,14 +67,14 @@ function DocsUpload() {
         }
 
       } catch (err) {
-        console.error('Error al cargar tipos de inscripción:', err);
-        setError('Error al cargar los tipos de documentos requeridos');
+        console.error('Error al cargar datos:', err);
+        setError('Error al cargar los datos necesarios');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTiposInscripcion();
+    fetchData();
   }, [inscripcionData.tipo]);
 
   const handleFileChange = (documentoId, file) => {
@@ -85,6 +100,11 @@ function DocsUpload() {
       return;
     }
 
+    if (!userData) {
+      alert('No se pudieron obtener los datos del usuario');
+      return;
+    }
+
     setEnviando(true);
 
     try {
@@ -96,26 +116,28 @@ function DocsUpload() {
         return;
       }
 
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-
       const paymentMethodMap = {
         'ventanilla': 'Ventanilla (Directo en Banco)',
         'mipago_uv': 'MiPago UV',
         'transferencia': 'Transferencia bancaria'
       };
 
-      const enrollmentPayload = {
+      // Crear FormData para enviar archivos
+      const formData = new FormData();
+
+      // Preparar el objeto de datos de inscripción
+      const enrollmentData = {
         id_enrollment: 0,
         student: {
-          given_names: userInfo.given_names || "string",
-          paternal_last_name: userInfo.paternal_last_name || "string",
-          maternal_last_name: userInfo.maternal_last_name || "string",
-          enrollment_number: userInfo.enrollment_number || "string",
-          phone: userInfo.phone || "string",
-          email: userInfo.email || "user@example.com",
-          sex: userInfo.sex || "M",
-          role: userInfo.role || "string",
-          active: true
+          given_names: userData.given_names,
+          paternal_last_name: userData.paternal_last_name,
+          maternal_last_name: userData.maternal_last_name,
+          enrollment_number: userData.enrollment_number,
+          phone: userData.phone,
+          email: userData.email,
+          sex: userData.sex,
+          role: userData.role,
+          active: userData.active
         },
         group_name: inscripcionData.grupoNombre || "string",
         enrollment_status: "Pendiente",
@@ -134,15 +156,27 @@ function DocsUpload() {
         authorization_number: ""
       };
 
-      console.log('Payload de inscripción:', enrollmentPayload);
+      // Agregar los datos de inscripción como JSON string
+      formData.append('enrollment_data', JSON.stringify(enrollmentData));
+
+      // Agregar cada archivo al FormData
+      Object.keys(archivosSubidos).forEach((documentId) => {
+        const file = archivosSubidos[documentId];
+        if (file) {
+          formData.append(`document_${documentId}`, file);
+        }
+      });
+
+      console.log('Payload de inscripción:', enrollmentData);
+      console.log('Enviando inscripción con archivos...');
 
       const enrollmentResponse = await fetch('http://localhost:8000/enrollment/submit_enrollment', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
+          // NO incluir Content-Type, el navegador lo establece automáticamente
         },
-        body: JSON.stringify(enrollmentPayload)
+        body: formData
       });
 
       if (!enrollmentResponse.ok) {
@@ -152,8 +186,6 @@ function DocsUpload() {
 
       const enrollmentResult = await enrollmentResponse.json();
       console.log('Inscripción creada:', enrollmentResult);
-
-      console.log('Archivos a subir:', archivosSubidos);
 
       alert('✅ Inscripción creada exitosamente. Tus documentos han sido registrados.');
 
