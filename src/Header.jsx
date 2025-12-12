@@ -90,9 +90,9 @@ export default function Header(){
 
     return(
         <header>
-            <a href="/dashboard" className="home-button">
+            {/* <a href="/dashboard" className="home-button">
+            </a> */}
                 <h2>Centro de Idiomas UV</h2>
-            </a>
             <div className="user-menu-container" ref={menuRef}>
                 <button className="user-display" onClick={toggleMenu} disabled={loading}>
                     {loading ? 'Cargando...' : username}
@@ -100,9 +100,9 @@ export default function Header(){
                 </button>
                 {isMenuOpen && (
                     <div className="user-dropdown-menu">
-                        <button onClick={handleProfile} className="menu-item">
+                        {/* <button onClick={handleProfile} className="menu-item">
                             Mi perfil
-                        </button>
+                        </button> */}
                         <button onClick={handleLogout} className="menu-item">
                             Cerrar sesión
                         </button>
