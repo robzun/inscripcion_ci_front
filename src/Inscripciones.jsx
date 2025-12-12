@@ -2,32 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 
 export default function Inscripciones() {
-  const inscripciones = [
-    {
-      id: 1,
-      idioma: "Japonés",
-      codigo: "JBAS-101",
-      campus: "Coatzacoalcos",
-      nrc: "12345",
-      status: "alert",
-    },
-    {
-      id: 2,
-      idioma: "Japonés",
-      codigo: "JBAS-101",
-      campus: "Coatzacoalcos",
-      nrc: "12345",
-      status: "success",
-    },
-    {
-      id: 3,
-      idioma: "Japonés",
-      codigo: "JBAS-101",
-      campus: "Coatzacoalcos",
-      nrc: "12345",
-      status: "pending",
-    },
-  ]
+  const inscripciones = []
 
   const getStatusIcon = (status) => {
     switch (status) {
