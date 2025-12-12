@@ -8,22 +8,24 @@ export default function Inscripciones() {
   const navigate = useNavigate();
 
   const getStatusIcon = (status) => {
-    switch (status) {
-      case "alert":
-        return <i className="fa-regular fa-circle-xmark" style={{color: "red"}}></i>;
-      case "success":
-        return <i className="fa-regular fa-circle-check" style={{color: "green"}}></i>;
-      case "pending":
-        return <i className="fa-regular fa-circle-pause" style={{color: "gold"}}></i>;
-      default:
-        return null;
+    if (!status) return null;
+
+    const normalized = status.toLowerCase();
+
+    if (normalized.includes("pend")) {
+      return <i className="fa-regular fa-circle-pause" style={{ color: "gold" }}></i>;
     }
+    if (normalized.includes("rech") || normalized.includes("cancel")) {
+      return <i className="fa-regular fa-circle-xmark" style={{ color: "red" }}></i>;
+    }
+
+    return <i className="fa-regular fa-circle-check" style={{ color: "green" }}></i>;
   };
 
   useEffect(() => {
     const fetchInscripciones = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("token");
         if (!token) {
           console.error("No hay token. El usuario no está autenticado.");
           setLoading(false);
@@ -49,8 +51,9 @@ export default function Inscripciones() {
         }
 
         const data = await response.json();
-        const items = Array.isArray(data.items) ? data.items : [];
+        const items = Array.isArray(data.data) ? data.data : [];
         setInscripciones(items);
+
       } catch (error) {
         console.error(error);
         setInscripciones([]);
@@ -66,7 +69,7 @@ export default function Inscripciones() {
     <>
       <Header />
 
-      <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>Tus inscripciones</h1>
         <aside>
           <button
@@ -94,25 +97,26 @@ export default function Inscripciones() {
       }}>
         {inscripciones.map((insc) => (
           <div
-            key={insc.id}
-            style={{
-              padding: "20px",
-              borderRadius: "15px",
-              boxShadow: "0px 3px 10px rgba(0,0,0,0.15)",
-              background: "white"
-            }}
+            key={insc.id_enrollment}
+            className='container'
           >
-            <div style={{display: "flex", justifyContent: "space-between"}}>
-              <h2>{insc.language_name || insc.language || "Idioma"}</h2>
-              <h2>{insc.level_code || insc.level || ""}</h2>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <h2>{insc.group_name}</h2>
+              <div style={{ fontSize: "30px" }}>
+                {getStatusIcon(insc.enrollment_status)}
+              </div>
             </div>
 
-            <p>Campus: {insc.campus_name || insc.campus}</p>
-            <p>NRC: {insc.nrc}</p>
+            <p>Periodo: {insc.academic_term_name}</p>
+            <p>Tipo: {insc.enrollment_type_name}</p>
 
-            <div style={{marginTop: "10px", fontSize: "24px"}}>
-              {getStatusIcon(insc.status)}
-            </div>
+            {insc.student && (
+              <p>Alumno: {insc.student.given_names} {insc.student.paternal_last_name}</p>
+            )}
+            
+            <p style={{ marginTop: "10px", color: "#555" }}>
+              Fecha de inscripción: {new Date(insc.enrollment_date).toLocaleString()}
+            </p>
           </div>
         ))}
       </div>
