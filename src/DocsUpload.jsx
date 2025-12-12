@@ -132,7 +132,7 @@ function DocsUpload() {
         nrc: inscripcionData.nrc || "string",
         campus_name: inscripcionData.campusNombre || "string",
         note: "",
-        outreach_channel: "Facebook",
+        outreach_channel: "",
         payment_method: paymentMethodMap[inscripcionData.metodoPago] || "Ventanilla (Directo en Banco)",
         payment_line: "",
         reference_number: "",

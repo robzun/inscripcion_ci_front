@@ -84,11 +84,11 @@ export default function Login() {
       // 3. Lógica de Redirección Condicional
       // Aquí defines a dónde redirigir según el valor de 'role'
       if (userRole === 'Alumno') {
-        navigate('/mis_inscripciones'); // Ruta para Alumnos
+        navigate('/mis-inscripciones'); // Ruta para Alumnos
       } else if (userRole === 'Administrador') {
         navigate('/dashboard'); // Ruta para Administradores
       } else if (userRole === 'Validador') {
-        navigate('/'); // Ruta para Validadores
+        navigate('/lista-inscripciones'); // Ruta para Validadores
       } else {
         // Redirección por defecto o mensaje de error de rol desconocido
         console.warn(`Rol desconocido: ${userRole}. Redirigiendo a /`);

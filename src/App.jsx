@@ -7,6 +7,7 @@ import DocsUpload from './DocsUpload';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 import ValidadorDashboard from './ValidadorDashboard';
+import ListaInscripciones from './ListaInscripciones';
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
 
       {/* Rutas protegidas (requieren sesión iniciada) */}
       <Route 
-        path="/mis_inscripciones" 
+        path="/mis-inscripciones" 
         element={
           <ProtectedRoute>
             <Inscripciones />
@@ -67,6 +68,14 @@ function App() {
         element={
           <ProtectedRoute>
             <ValidadorDashboard/>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/lista-inscripciones"
+        element={
+          <ProtectedRoute>
+            <ListaInscripciones/>
           </ProtectedRoute>
         } 
       />
