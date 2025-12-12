@@ -27,6 +27,7 @@ function InscripcionEstado() {
           return;
         }
 
+        // Fetch de datos del usuario
         const userResponse = await fetch('http://localhost:8000/user/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -39,6 +40,7 @@ function InscripcionEstado() {
         console.log("DATOS DEL USUARIO:", user);
         setUserData(user);
 
+        // Fetch de tipos de inscripción
         const response = await fetch('http://localhost:8000/enrollment_type', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -120,8 +122,10 @@ function InscripcionEstado() {
         'transferencia': 'Transferencia bancaria'
       };
 
+      // Crear FormData para enviar todo junto
       const formData = new FormData();
 
+      // Preparar el objeto de datos de inscripción
       const enrollmentData = {
         id_enrollment: 0,
         student: {
@@ -152,8 +156,10 @@ function InscripcionEstado() {
         authorization_number: ""
       };
 
+      // Agregar los datos de inscripción como un campo JSON string
       formData.append('enrollment', JSON.stringify(enrollmentData));
 
+      // Agregar cada archivo al FormData con su document_type_id
       Object.keys(archivosSubidos).forEach((documentId) => {
         const file = archivosSubidos[documentId];
         if (file) {
@@ -168,6 +174,7 @@ function InscripcionEstado() {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
+          // NO incluir Content-Type, el navegador lo establece automáticamente
         },
         body: formData
       });
@@ -240,7 +247,7 @@ function InscripcionEstado() {
       <Header />
       <div>
         <h1>Inscripción</h1>
-            
+
         <div className="info-inscripcion">
           <div className="info-item">
             <span className="info-label">Idioma</span>
