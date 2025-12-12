@@ -8,6 +8,7 @@ import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 import ValidadorDashboard from './ValidadorDashboard';
 import ListaInscripciones from './ListaInscripciones';
+import InscripcionEstado from './InscripcionEstado';
 
 function App() {
   return (
@@ -44,6 +45,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Inscripciones />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/ver-inscripcion" 
+        element={
+          <ProtectedRoute>
+            <InscripcionEstado />
           </ProtectedRoute>
         } 
       />

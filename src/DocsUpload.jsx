@@ -122,7 +122,7 @@ function DocsUpload() {
         'transferencia': 'Transferencia bancaria'
       };
 
-      // Crear FormData para enviar archivos
+      // Crear FormData para enviar todo junto
       const formData = new FormData();
 
       // Preparar el objeto de datos de inscripción
@@ -149,25 +149,25 @@ function DocsUpload() {
         nrc: inscripcionData.nrc || "string",
         campus_name: inscripcionData.campusNombre || "string",
         note: "",
-        outreach_channel: "",
+        outreach_channel: "Facebook",
         payment_method: paymentMethodMap[inscripcionData.metodoPago] || "Ventanilla (Directo en Banco)",
         payment_line: "",
         reference_number: "",
         authorization_number: ""
       };
 
-      // Agregar los datos de inscripción como JSON string
-      formData.append('enrollment_data', JSON.stringify(enrollmentData));
+      // Agregar los datos de inscripción como un campo JSON string
+      formData.append('enrollment', JSON.stringify(enrollmentData));
 
-      // Agregar cada archivo al FormData
+      // Agregar cada archivo al FormData con su document_type_id
       Object.keys(archivosSubidos).forEach((documentId) => {
         const file = archivosSubidos[documentId];
         if (file) {
-          formData.append(`document_${documentId}`, file);
+          formData.append('files', file);
+          formData.append('document_type_ids', documentId);
         }
       });
 
-      console.log('Payload de inscripción:', enrollmentData);
       console.log('Enviando inscripción con archivos...');
 
       const enrollmentResponse = await fetch('http://localhost:8000/enrollment/submit_enrollment', {
@@ -181,6 +181,7 @@ function DocsUpload() {
 
       if (!enrollmentResponse.ok) {
         const errorData = await enrollmentResponse.json();
+        console.error('Error del servidor:', errorData);
         throw new Error(errorData.detail || 'Error al crear la inscripción');
       }
 
@@ -188,7 +189,6 @@ function DocsUpload() {
       console.log('Inscripción creada:', enrollmentResult);
 
       alert('✅ Inscripción creada exitosamente. Tus documentos han sido registrados.');
-
       navigate('/dashboard');
 
     } catch (err) {

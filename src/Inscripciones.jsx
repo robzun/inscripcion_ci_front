@@ -96,10 +96,11 @@ export default function Inscripciones() {
         marginTop: "20px"
       }}>
         {inscripciones.map((insc) => (
+          <a href="/ver-inscripcion">
           <div
             key={insc.id_enrollment}
             className='container'
-          >
+            >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <h2>{insc.group_name}</h2>
               <div style={{ fontSize: "30px" }}>
@@ -109,15 +110,12 @@ export default function Inscripciones() {
 
             <p>Periodo: {insc.academic_term_name}</p>
             <p>Tipo: {insc.enrollment_type_name}</p>
-
-            {insc.student && (
-              <p>Alumno: {insc.student.given_names} {insc.student.paternal_last_name}</p>
-            )}
             
             <p style={{ marginTop: "10px", color: "#555" }}>
               Fecha de inscripción: {new Date(insc.enrollment_date).toLocaleString()}
             </p>
           </div>
+            </a>
         ))}
       </div>
     </>
