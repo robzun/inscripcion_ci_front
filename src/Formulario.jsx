@@ -223,7 +223,7 @@ function Formulario() {
   };
 
   const handleCancel = () => {
-    navigate(-1);
+    navigate('/mis-inscripciones');
   };
 
   const handleSubmit = (e) => {

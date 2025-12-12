@@ -7,11 +7,11 @@ export default function Inscripciones() {
   const getStatusIcon = (status) => {
     switch (status) {
       case "alert":
-        return <AlertCircle className="h-6 w-6 text-red-500" />
+        return <i class="fa-regular fa-circle-xmark" style={{color: "red"}}></i>
       case "success":
-        return <CheckCircle className="h-6 w-6 text-green-500" />
+        return <i class="fa-regular fa-circle-check" style={{color: "green"}}></i>
       case "pending":
-        return <Smile className="h-6 w-6 text-yellow-500" />
+        return <i class="fa-regular fa-circle-pause" style={{color: "yellow"}}></i>
       default:
         return null
     }
