@@ -246,7 +246,7 @@ function InscripcionEstado() {
     <>
       <Header />
       <div>
-        <h1>Inscripciónx</h1>
+        <h1>Inscripción</h1>
 
         <div className="info-inscripcion">
           <div className="info-item">
