@@ -8,16 +8,13 @@ export default function Header(){
     const menuRef = useRef(null);
     const navigate = useNavigate();
 
-    // Obtener el nombre del usuario al cargar el componente
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                // Obtener el token del localStorage
                 const token = localStorage.getItem('token');
                 
                 if (!token) {
-                    // Si no hay token, redirigir al login
-                    // navigate('/login');
+                    navigate('/login');
                     return;
                 }
                 
@@ -30,22 +27,18 @@ export default function Header(){
                 });
 
                 if (!response.ok) {
-                    // Si el token no es válido o expiró, limpiar localStorage y redirigir
-                    // localStorage.removeItem('token');
-                    // localStorage.removeItem('user');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
                     throw new Error('Token inválido o expirado');
                 }
 
                 const data = await response.json();
                 
-                // Ajusta según la estructura de respuesta de tu API
-                // Ejemplo: si devuelve { given_names: "Roberto", paternal_last_name: "Zúñiga" }
                 const fullName = `${data.given_names} ${data.paternal_last_name} ${data.maternal_last_name}`;
                 setUsername(fullName);
                 
             } catch (error) {
                 console.error('Error al cargar usuario:', error);
-                // Si hay error, redirigir al login
                 navigate('/login');
             } finally {
                 setLoading(false);
@@ -60,21 +53,17 @@ export default function Header(){
     };
 
     const handleLogout = () => {
-        // Limpiar el localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         
-        // Redirigir al login
         navigate('/login');
     };
 
     const handleProfile = () => {
-        // Redirigir al perfil
         navigate('/perfil');
         setIsMenuOpen(false);
     };
 
-    // Cerrar el menú al hacer click fuera de él
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {

@@ -40,7 +40,6 @@ function DocsUpload() {
         const tipos = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
         setTiposInscripcion(tipos);
 
-        // Buscar el tipo de inscripción seleccionado y extraer sus documentos
         const tipoSeleccionado = tipos.find(
           tipo => tipo.id_enrollment_type == inscripcionData.tipo
         );
@@ -77,7 +76,6 @@ function DocsUpload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar que todos los documentos requeridos estén subidos
     const documentosFaltantes = documentos.filter(
       doc => !archivosSubidos[doc.id_document_type]
     );
@@ -98,17 +96,14 @@ function DocsUpload() {
         return;
       }
 
-      // Obtener información del usuario del localStorage o de donde esté disponible
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 
-      // Mapear el método de pago al formato esperado por la API
       const paymentMethodMap = {
         'ventanilla': 'Ventanilla (Directo en Banco)',
         'mipago_uv': 'MiPago UV',
         'transferencia': 'Transferencia bancaria'
       };
 
-      // Preparar el payload para crear la inscripción
       const enrollmentPayload = {
         id_enrollment: 0,
         student: {
@@ -125,7 +120,7 @@ function DocsUpload() {
         group_name: inscripcionData.grupoNombre || "string",
         enrollment_status: "Pendiente",
         enrollment_date: new Date().toISOString(),
-        academic_term_name: "string", // Esto debería venir de los datos del grupo
+        academic_term_name: "string",
         enrollment_type_name: inscripcionData.tipoNombre || "string",
         language_name: inscripcionData.idiomaNombre || "string",
         level_name: inscripcionData.nivelNombre || "string",
@@ -141,7 +136,6 @@ function DocsUpload() {
 
       console.log('Payload de inscripción:', enrollmentPayload);
 
-      // Crear la inscripción
       const enrollmentResponse = await fetch('http://localhost:8000/enrollment/submit_enrollment', {
         method: 'POST',
         headers: {
@@ -159,14 +153,10 @@ function DocsUpload() {
       const enrollmentResult = await enrollmentResponse.json();
       console.log('Inscripción creada:', enrollmentResult);
 
-      // Aquí podrías subir los archivos individualmente si tienes un endpoint para ello
-      // Por ahora solo mostramos los archivos en consola
       console.log('Archivos a subir:', archivosSubidos);
 
-      // Mostrar mensaje de éxito
       alert('✅ Inscripción creada exitosamente. Tus documentos han sido registrados.');
 
-      // Redirigir al dashboard
       navigate('/dashboard');
 
     } catch (err) {

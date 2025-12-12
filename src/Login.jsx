@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 export default function Login() {
   const navigate = useNavigate();
 
-  // ... (otros estados y handleChange son iguales)
-
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -22,24 +20,21 @@ export default function Login() {
     }));
   };
   
-  // Función para obtener la información del usuario (incluyendo el rol)
   const fetchUserRole = async (token) => {
     const userResponse = await fetch('http://localhost:8000/user/me', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        // Asegúrate de enviar el token de autorización
         'Authorization': `Bearer ${token}`,
       },
     });
 
     if (!userResponse.ok) {
-      // Manejar el caso de que la llamada falle, aunque el login haya sido exitoso
       throw new Error('Error al obtener la información del usuario');
     }
 
     const userData = await userResponse.json();
-    return userData; // Devuelve el objeto completo del usuario
+    return userData;
   };
 
   const handleSubmit = async (e) => {
@@ -48,7 +43,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 1. Llamada al endpoint de Login
       const loginResponse = await fetch('http://localhost:8000/user/login', {
         method: 'POST',
         headers: {
@@ -67,7 +61,6 @@ export default function Login() {
       const loginData = await loginResponse.json();
       console.log('Inicio de sesión exitoso:', loginData);
 
-      // Guardar el token en localStorage
       const token = loginData.access_token;
       if (token) {
         localStorage.setItem('token', token);
@@ -75,29 +68,24 @@ export default function Login() {
         throw new Error('Token no recibido');
       }
 
-      // 2. Obtener la información completa del usuario, incluyendo el rol
       const userData = await fetchUserRole(token);
-      localStorage.setItem('user', JSON.stringify(userData)); // Opcional: guardar info completa
+      localStorage.setItem('user', JSON.stringify(userData));
       
       const userRole = userData.role;
 
-      // 3. Lógica de Redirección Condicional
-      // Aquí defines a dónde redirigir según el valor de 'role'
       if (userRole === 'Alumno') {
-        navigate('/mis-inscripciones'); // Ruta para Alumnos
+        navigate('/mis-inscripciones');
       } else if (userRole === 'Administrador') {
-        navigate('/dashboard'); // Ruta para Administradores
+        navigate('/dashboard');
       } else if (userRole === 'Validador') {
-        navigate('/lista-inscripciones'); // Ruta para Validadores
-      } else {
-        // Redirección por defecto o mensaje de error de rol desconocido
+        navigate('/lista-inscripciones');
+      } else {        
         console.warn(`Rol desconocido: ${userRole}. Redirigiendo a /`);
         navigate('/'); 
       }
       
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión. Verifica tus credenciales.');
-      // Importante: Si falla alguna de las llamadas, limpia el token si se llegó a guardar
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     } finally {
@@ -106,7 +94,6 @@ export default function Login() {
   };
 
   return (
-    // ... (El JSX del formulario es el mismo)
     <div className="login-container">
       <img src="assets/fondo_usbi.png" alt="USBI" className="login-image" />
       <aside className="login-form">
